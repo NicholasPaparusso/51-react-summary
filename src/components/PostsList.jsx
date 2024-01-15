@@ -3,50 +3,52 @@ import Post from './Post';
 import NewPost from './NewPost';
 import Modal from './Modal';
 import { useState } from 'react';
-function PostsList () {
-    const [modalIsVisible, setModalIsVisible] = useState(true);
-    const [enteredBody , setEnteredBody] = useState('');
-    const [enteredAuthor , setEnteredAuhor] = useState('');
+function PostsList ({isPosting,onStopPosting}) {
 
-    function bodyChangeHandler(event) {
-        setEnteredBody(event.target.value)
+    const [posts, setPosts] = useState([]);
+
+    function addPostHandler(postData) {
+        setPosts((existingPosts) => {
+            return [postData , ...existingPosts];
+        } );
     }
-
-    function authorChangeHandler(event) {
-        setEnteredAuhor(event.target.value)
-    }
-
-    function showModalHandler() {
-        setModalIsVisible(true);
-    }
-
-    function hideModalHandler(){
-        setModalIsVisible(false);
-    }
-
-    // let modalContent
-
-    // if(modalIsVisible){
-    //     modalContent = (
-    //         <Modal onClose={hideModalHandler}>
-    //             <NewPost onBodyChange={bodyChangeHandler} onAuthorChange={authorChangeHandler}/>
-    //         </Modal>
-    //     );
-    // }
 
     return (
         <>
-            {modalIsVisible && (
-            <Modal onClose={hideModalHandler}>
-                <NewPost 
-                onBodyChange={bodyChangeHandler} 
-                onAuthorChange={authorChangeHandler}/>
+            {isPosting && (
+            <Modal onClose={onStopPosting}>
+                <NewPost
+                    onAddPost={addPostHandler}
+                    onCancel={onStopPosting} 
+                />
             </Modal>
             )}
-            <ul className={classes.posts}>
-                <Post author={enteredAuthor} body={enteredBody} />
-                <Post author={'Triciolas'} body={'Lorem'} />
-            </ul>
+            {posts.length > 0 && (
+                <ul className={classes.posts}>
+                    {
+                        posts.map( (post) => {
+                            return(
+                                <Post 
+                                    key={`${post.author}-${post.body}-${new Date().toString()}`} 
+                                    author={post.author} 
+                                    body={post.body} 
+                                />
+                            );
+                        } )
+                    }
+                </ul>
+
+            )}
+            {posts.length === 0 && 
+                <div style={{textAlign: 'center', color: 'white' }}>
+                    <h2>
+                        There are no post yet.
+                    </h2>
+                    <p>
+                        Start adding some !
+                    </p>
+                </div>
+            }
         </>
     );
 };
